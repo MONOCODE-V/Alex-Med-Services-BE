@@ -1,0 +1,219 @@
+noerDiagram
+    USER ||--o{ PATIENT : "is"
+    USER ||--o{ DOCTOR : "is"
+    USER ||--o{ ADMIN : "is"
+    USER {
+        int user_id PK
+        string email UK
+        string password_hash
+        string phone
+        enum role "PATIENT, DOCTOR, ADMIN"
+        datetime created_at
+        datetime last_login
+        boolean is_active
+    }
+
+    PATIENT ||--o{ APPOINTMENT : "books"
+    PATIENT ||--o{ MEDICAL_RECORD : "has"
+    PATIENT ||--o{ NOTIFICATION : "receives"
+    PATIENT {
+        int patient_id PK
+        int user_id FK
+        string first_name
+        string last_name
+        date date_of_birth
+        enum gender "MALE, FEMALE, OTHER"
+        string address
+        string emergency_contact
+        string emergency_phone
+        string blood_type
+        text allergies
+        text chronic_conditions
+    }
+
+    DOCTOR ||--o{ APPOINTMENT : "attends"
+    DOCTOR ||--o{ DOCTOR_SCHEDULE : "has"
+    DOCTOR ||--o{ SPECIALIZATION : "has"
+    DOCTOR {
+        int doctor_id PK
+        int user_id FK
+        string first_name
+        string last_name
+        string license_number UK
+        int years_of_experience
+        text qualifications
+        text bio
+        decimal consultation_fee
+        int average_consultation_minutes
+        boolean is_available
+    }
+
+    ADMIN {
+        int admin_id PK
+        int user_id FK
+        string first_name
+        string last_name
+        enum admin_level "SUPER, REGULAR"
+    }
+
+    SPECIALIZATION {
+        int specialization_id PK
+        int doctor_id FK
+        string specialization_name
+        text description
+    }
+
+    APPOINTMENT ||--o{ MEDICAL_RECORD : "generates"
+    APPOINTMENT ||--o{ NOTIFICATION : "triggers"
+    APPOINTMENT }|--|| CLINIC : "scheduled_at"
+    APPOINTMENT {
+        int appointment_id PK
+        int patient_id FK
+        int doctor_id FK
+        int clinic_id FK
+        datetime appointment_date
+        time appointment_time
+        int duration_minutes
+        enum appointment_type "CONSULTATION, FOLLOWUP, EMERGENCY, CHECKUP"
+        enum status "SCHEDULED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW"
+        text reason_for_visit
+        text patient_notes
+        decimal consultation_fee
+        boolean is_paid
+        datetime created_at
+        datetime updated_at
+        int cancelled_by FK "user_id"
+        datetime cancelled_at
+        text cancellation_reason
+    }
+
+    DOCTOR_SCHEDULE }|--|| DOCTOR : "belongs_to"
+    DOCTOR_SCHEDULE }|--|| CLINIC : "at_location"
+    DOCTOR_SCHEDULE {
+        int schedule_id PK
+        int doctor_id FK
+        int clinic_id FK
+        enum day_of_week "MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY"
+        time start_time
+        time end_time
+        int slot_duration_minutes
+        boolean is_available
+        date effective_from
+        date effective_until
+    }
+
+    CLINIC ||--o{ APPOINTMENT : "hosts"
+    CLINIC ||--o{ DOCTOR_SCHEDULE : "has"
+    CLINIC {
+        int clinic_id PK
+        string clinic_name
+        string address
+        string city
+        string phone
+        string email
+        text facilities
+        time opening_time
+        time closing_time
+        boolean is_active
+    }
+
+    MEDICAL_RECORD }|--|| PATIENT : "belongs_to"
+    MEDICAL_RECORD }|--|| DOCTOR : "created_by"
+    MEDICAL_RECORD {
+        int record_id PK
+        int patient_id FK
+        int doctor_id FK
+        int appointment_id FK
+        datetime visit_date
+        text symptoms
+        text diagnosis
+        text treatment_plan
+        text prescriptions
+        text lab_tests_ordered
+        text doctor_notes
+        decimal height_cm
+        decimal weight_kg
+        int blood_pressure_systolic
+        int blood_pressure_diastolic
+        decimal temperature_celsius
+        int heart_rate
+        datetime created_at
+        datetime updated_at
+    }
+
+    NOTIFICATION }|--|| USER : "sent_to"
+    NOTIFICATION {
+        int notification_id PK
+        int user_id FK
+        int appointment_id FK
+        enum notification_type "APPOINTMENT_CONFIRMATION, APPOINTMENT_REMINDER, APPOINTMENT_CANCELLATION, RESCHEDULING, GENERAL"
+        enum channel "EMAIL, SMS, IN_APP"
+        string subject
+        text message
+        enum status "PENDING, SENT, FAILED, READ"
+        datetime scheduled_for
+        datetime sent_at
+        datetime read_at
+        int retry_count
+    }
+
+    PAYMENT ||--|| APPOINTMENT : "for"
+    PAYMENT {
+        int payment_id PK
+        int appointment_id FK
+        int patient_id FK
+        decimal amount
+        enum payment_method "CASH, CREDIT_CARD, DEBIT_CARD, INSURANCE, ONLINE"
+        enum payment_status "PENDING, COMPLETED, FAILED, REFUNDED"
+        string transaction_id UK
+        datetime payment_date
+        text payment_notes
+    }
+
+    APPOINTMENT_HISTORY {
+        int history_id PK
+        int appointment_id FK
+        enum action "CREATED, UPDATED, CONFIRMED, CANCELLED, COMPLETED, RESCHEDULED"
+        int performed_by FK "user_id"
+        datetime action_date
+        text notes
+        text old_values
+        text new_values
+    }
+
+    WAITING_LIST ||--|| PATIENT : "contains"
+    WAITING_LIST ||--|| DOCTOR : "for"
+    WAITING_LIST {
+        int waiting_list_id PK
+        int patient_id FK
+        int doctor_id FK
+        int clinic_id FK
+        date preferred_date
+        time preferred_time_from
+        time preferred_time_to
+        enum priority "NORMAL, URGENT"
+        enum status "ACTIVE, FULFILLED, CANCELLED"
+        datetime created_at
+        datetime fulfilled_at
+    }
+
+    SYSTEM_SETTINGS {
+        int setting_id PK
+        string setting_key UK
+        string setting_value
+        text description
+        datetime updated_at
+        int updated_by FK "user_id"
+    }
+
+    AUDIT_LOG {
+        int log_id PK
+        int user_id FK
+        string action
+        string table_name
+        int record_id
+        text old_values
+        text new_values
+        string ip_address
+        datetime created_at
+    }
