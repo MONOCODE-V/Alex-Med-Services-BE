@@ -1,0 +1,214 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum AdminLevel {
+  SUPER
+  REGULAR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  phone        String?
+  role         Role
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+  isActive     Boolean   @default(true)
+  
+  patient      Patient?
+  doctor       Doctor?
+  admin        Admin?
+}
+
+model Patient {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime?
+  gender      Gender?
+  address     String?
+  phone       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  appointments Appointment[] @relation("PatientAppointments")
+  reviews      Review[]      @relation("PatientReviews")
+}
+
+model Doctor {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  profileImage      String?
+  yearsOfExperience Int?
+  qualifications    String?
+  bio               String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  specializations   DoctorSpecialization[] @relation("DoctorSpecializations")
+  clinics           DoctorClinic[]         @relation("DoctorClinics")
+  schedules         DoctorSchedule[]       @relation("DoctorSchedules")
+  appointments      Appointment[]         @relation("DoctorAppointments")
+  reviews           Review[]              @relation("DoctorReviews")
+}
+
+model Admin {
+  id         Int        @id @default(autoincrement())
+  userId     Int        @unique
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName  String
+  lastName   String
+  adminLevel AdminLevel
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+// Specializations (اسنان، نفسي، عظام، etc.)
+model Specialization {
+  id          Int                    @id @default(autoincrement())
+  name        String                 @unique // Arabic name
+  nameEn      String?                // English name
+  description String?
+  icon        String?                // Icon/image for the specialty
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  
+  doctors     DoctorSpecialization[]
+}
+
+// Many-to-many: Doctor can have multiple specializations
+model DoctorSpecialization {
+  id               Int            @id @default(autoincrement())
+  doctorId         Int
+  doctor           Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorSpecializations")
+  specializationId Int
+  specialization   Specialization @relation(fields: [specializationId], references: [id], onDelete: Cascade)
+  isPrimary        Boolean        @default(false) // Primary specialty
+  createdAt        DateTime       @default(now())
+  
+  @@unique([doctorId, specializationId])
+  @@index([specializationId])
+}
+
+// Clinics/Locations (doctors can work in multiple clinics)
+model Clinic {
+  id           Int            @id @default(autoincrement())
+  name         String
+  city         String         // القاهرة، الجيزة
+  area         String         // الدقي، مصر الجديدة
+  address      String
+  phone        String?
+  mapUrl       String?        // Google Maps link
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  doctors      DoctorClinic[]
+  appointments Appointment[]
+}
+
+// Many-to-many: Doctor can work in multiple clinics
+model DoctorClinic {
+  id              Int              @id @default(autoincrement())
+  doctorId        Int
+  doctor          Doctor           @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorClinics")
+  clinicId        Int
+  clinic          Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  consultationFee Float?           // Fee at this specific clinic
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  schedules       DoctorSchedule[]
+  
+  @@unique([doctorId, clinicId])
+  @@index([clinicId])
+}
+
+// Doctor availability schedule
+model DoctorSchedule {
+  id             Int          @id @default(autoincrement())
+  doctorId       Int
+  doctor         Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorSchedules")
+  doctorClinicId Int
+  doctorClinic   DoctorClinic @relation(fields: [doctorClinicId], references: [id], onDelete: Cascade)
+  dayOfWeek      Int          // 0-6 (Sunday-Saturday)
+  startTime      String       // "09:00"
+  endTime        String       // "17:00"
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@index([doctorId])
+  @@index([doctorClinicId])
+}
+
+// Reviews & Ratings
+model Review {
+  id         Int      @id @default(autoincrement())
+  patientId  Int
+  patient    Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade, name: "PatientReviews")
+  doctorId   Int
+  doctor     Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorReviews")
+  rating     Float    // 1-5 stars
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([patientId, doctorId]) // One review per patient per doctor
+  @@index([doctorId])
+}
+
+// Appointments
+model Appointment {
+  id          Int                @id @default(autoincrement())
+  patientId   Int
+  patient     Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade, name: "PatientAppointments")
+  doctorId    Int
+  doctor      Doctor             @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorAppointments")
+  clinicId    Int?
+  clinic      Clinic?            @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  dateTime    DateTime
+  status      AppointmentStatus  @default(PENDING)
+  notes       String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([clinicId])
+  @@index([dateTime])
+}
+

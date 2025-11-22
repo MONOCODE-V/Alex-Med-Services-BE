@@ -8,6 +8,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+const exampleRoutes = require('./src/routes/exampleRoutes');
+app.use('/api', exampleRoutes);
+
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Alex Med Services API' });
 });

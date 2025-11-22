@@ -3,57 +3,51 @@ noerDiagram
     USER ||--o{ DOCTOR : "is"
     USER ||--o{ ADMIN : "is"
     USER {
-        int user_id PK
-        string email UK
-        string password_hash
+        int userId PK
+        string email 
+        string passwordHash
         string phone
         enum role "PATIENT, DOCTOR, ADMIN"
-        datetime created_at
-        datetime last_login
-        boolean is_active
+        datetime createdAt
+        datetime lastLogin
+        boolean isActive
     }
 
     PATIENT ||--o{ APPOINTMENT : "books"
     PATIENT ||--o{ MEDICAL_RECORD : "has"
     PATIENT ||--o{ NOTIFICATION : "receives"
+
     PATIENT {
-        int patient_id PK
-        int user_id FK
-        string first_name
-        string last_name
-        date date_of_birth
+        int patientId PK auto
+        int userId FK  
+        string firstName
+        string lastName
+        date dateOfBirth
         enum gender "MALE, FEMALE, OTHER"
         string address
-        string emergency_contact
-        string emergency_phone
-        string blood_type
-        text allergies
-        text chronic_conditions
+        string phone
+     
     }
 
     DOCTOR ||--o{ APPOINTMENT : "attends"
     DOCTOR ||--o{ DOCTOR_SCHEDULE : "has"
     DOCTOR ||--o{ SPECIALIZATION : "has"
     DOCTOR {
-        int doctor_id PK
-        int user_id FK
-        string first_name
-        string last_name
-        string license_number UK
-        int years_of_experience
+        int doctorId PK
+        int userId FK
+        string firstName
+        string lastName
+        int yearsOfExperience
         text qualifications
-        text bio
-        decimal consultation_fee
-        int average_consultation_minutes
-        boolean is_available
-    }
+        text bio 
+         }
 
     ADMIN {
-        int admin_id PK
-        int user_id FK
-        string first_name
-        string last_name
-        enum admin_level "SUPER, REGULAR"
+        int adminId PK
+        int userId FK
+        string firstName
+        string lastName
+        enum adminLevel "SUPER, REGULAR"
     }
 
     SPECIALIZATION {
