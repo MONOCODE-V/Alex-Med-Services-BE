@@ -1,4 +1,4 @@
-const { getPrisma } = require('../db/prisma');
+import { getPrisma } from '../db/prisma';
 
 async function addReview({ patientId, doctorId, rating, comment }) {
   const prisma = getPrisma();
@@ -12,4 +12,5 @@ async function listDoctorReviews(doctorId) {
   return { averageRating: avg, count: reviews.length, reviews };
 }
 
-module.exports = { addReview, listDoctorReviews };
+export default { addReview, listDoctorReviews };
+

@@ -1,4 +1,4 @@
-const { getPrisma } = require('../db/prisma');
+import { getPrisma } from '../db/prisma';
 
 async function bookAppointment({ patientId, doctorId, clinicId, dateTime, notes }) {
   const prisma = getPrisma();
@@ -41,10 +41,11 @@ async function listPatientAppointments(patientId) {
   });
 }
 
-module.exports = {
+export default {
   bookAppointment,
   updateAppointmentStatus,
   cancelAppointment,
   listDoctorAppointments,
   listPatientAppointments
 };
+

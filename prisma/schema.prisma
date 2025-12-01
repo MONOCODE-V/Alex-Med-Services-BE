@@ -7,46 +7,24 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-}
-
-enum Role {
-  PATIENT
-  DOCTOR
-  ADMIN
-}
-
-enum AdminLevel {
-  SUPER
-  REGULAR
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-  NO_SHOW
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id           Int       @id @default(autoincrement())
+  username     String?   @unique
   email        String    @unique
   passwordHash String
   phone        String?
-  role         Role
+  role         String
   createdAt    DateTime  @default(now())
   lastLogin    DateTime?
   isActive     Boolean   @default(true)
   
-  patient      Patient?
-  doctor       Doctor?
-  admin        Admin?
+  patient       Patient?
+  doctor        Doctor?
+  admin         Admin?
+  notifications Notification[] @relation("UserNotifications")
 }
 
 model Patient {
@@ -56,7 +34,7 @@ model Patient {
   firstName   String
   lastName    String
   dateOfBirth DateTime?
-  gender      Gender?
+  gender      String?
   address     String?
   phone       String?
   createdAt   DateTime  @default(now())
@@ -92,7 +70,7 @@ model Admin {
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   firstName  String
   lastName   String
-  adminLevel AdminLevel
+  adminLevel String
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -199,9 +177,9 @@ model Appointment {
   doctorId    Int
   doctor      Doctor             @relation(fields: [doctorId], references: [id], onDelete: Cascade, name: "DoctorAppointments")
   clinicId    Int?
-  clinic      Clinic?            @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  clinic      Clinic?           @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   dateTime    DateTime
-  status      AppointmentStatus  @default(PENDING)
+  status      String            @default("PENDING")
   notes       String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
@@ -210,5 +188,27 @@ model Appointment {
   @@index([doctorId])
   @@index([clinicId])
   @@index([dateTime])
+}
+
+// Notifications (persistent storage for all notification types)
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, name: "UserNotifications")
+  role      String    // PATIENT, DOCTOR, ADMIN
+  type      String    // APPOINTMENT_REMINDER, STATUS_UPDATE, SCHEDULE_UPDATE, etc.
+  title     String
+  message   String
+  data      String?   // JSON string for additional data
+  priority  String    @default("medium") // high, medium, low
+  category  String?   // APPOINTMENTS, SCHEDULE, SYSTEM, etc.
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([role])
 }
 

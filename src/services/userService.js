@@ -1,4 +1,4 @@
-const { getPrisma } = require('../db/prisma');
+import { getPrisma } from '../db/prisma';
 
 async function createUser({ email, passwordHash, phone, role }) {
   const prisma = getPrisma();
@@ -40,7 +40,7 @@ async function listDoctors() {
   });
 }
 
-module.exports = {
+export default {
   createUser,
   getUserById,
   createPatientProfile,
@@ -48,3 +48,4 @@ module.exports = {
   createAdminProfile,
   listDoctors
 };
+

@@ -1,4 +1,4 @@
-const { getPrisma } = require('../db/prisma');
+import { getPrisma } from '../db/prisma';
 
 async function createClinic({ name, city, area, address, phone, mapUrl }) {
   const prisma = getPrisma();
@@ -34,10 +34,11 @@ async function listDoctorSchedules(doctorId) {
   return prisma.doctorSchedule.findMany({ where: { doctorId } });
 }
 
-module.exports = {
+export default {
   createClinic,
   assignDoctorToClinic,
   createDoctorSchedule,
   listClinicDoctors,
   listDoctorSchedules
 };
+

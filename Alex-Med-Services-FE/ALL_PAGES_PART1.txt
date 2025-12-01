@@ -1,0 +1,349 @@
+# Alex Medical Services - All Frontend Pages
+# Copy each section to its respective file path
+
+# ============================================
+# FILE: src/pages/patient/Dashboard.jsx
+# ============================================
+
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
+import api from '../../api/axios';
+import { FaCalendar, FaUserMd, FaStar, FaBell } from 'react-icons/fa';
+
+export default function PatientDashboard() {
+  const [stats, setStats] = useState({
+    upcomingAppointments: 0,
+    totalAppointments: 0,
+    unreadNotifications: 0,
+  });
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [appointmentsRes, notificationsRes] = await Promise.all([
+        api.get('/appointments/my-appointments?limit=5'),
+        api.get('/notifications/unread-count'),
+      ]);
+      
+      setAppointments(appointmentsRes.data.data.appointments);
+      setStats({
+        upcomingAppointments: appointmentsRes.data.data.appointments.filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED').length,
+        totalAppointments: appointmentsRes.data.data.totalAppointments,
+        unreadNotifications: notificationsRes.data.data.unreadCount,
+      });
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      COMPLETED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <div className="container px-6 py-8 mx-auto">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8">Patient Dashboard</h1>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="p-6 bg-white rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-full">
+                <FaCalendar className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-600">Upcoming</p>
+                <p className="text-2xl font-semibold text-gray-800">{stats.upcomingAppointments}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 bg-white rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-full">
+                <FaUserMd className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-600">Total Appointments</p>
+                <p className="text-2xl font-semibold text-gray-800">{stats.totalAppointments}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 bg-white rounded-lg shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 rounded-full">
+                <FaBell className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-600">Notifications</p>
+                <p className="text-2xl font-semibold text-gray-800">{stats.unreadNotifications}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            to="/patient/doctors"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-center"
+          >
+            <FaUserMd className="w-8 h-8 mx-auto text-blue-500 mb-2" />
+            <p className="font-medium text-gray-800">Find Doctors</p>
+          </Link>
+
+          <Link
+            to="/patient/appointments"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-center"
+          >
+            <FaCalendar className="w-8 h-8 mx-auto text-green-500 mb-2" />
+            <p className="font-medium text-gray-800">My Appointments</p>
+          </Link>
+
+          <Link
+            to="/notifications"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-center"
+          >
+            <FaBell className="w-8 h-8 mx-auto text-purple-500 mb-2" />
+            <p className="font-medium text-gray-800">Notifications</p>
+          </Link>
+
+          <Link
+            to="/profile"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition text-center"
+          >
+            <FaStar className="w-8 h-8 mx-auto text-yellow-500 mb-2" />
+            <p className="font-medium text-gray-800">My Profile</p>
+          </Link>
+        </div>
+
+        {/* Recent Appointments */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Appointments</h2>
+          
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : appointments.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No appointments yet</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Doctor</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date & Time</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((appointment) => (
+                    <tr key={appointment.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        Dr. {appointment.doctor.firstName} {appointment.doctor.lastName}
+                      </td>
+                      <td className="px-4 py-3">
+                        {new Date(appointment.dateTime).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(appointment.status)}`}>
+                          {appointment.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {appointment.status === 'COMPLETED' && (
+                          <Link
+                            to={`/patient/review/${appointment.id}`}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            Write Review
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+# ============================================
+# FILE: src/pages/patient/DoctorSearch.jsx
+# ============================================
+
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
+import api from '../../api/axios';
+import { FaSearch, FaStar, FaUserMd } from 'react-icons/fa';
+
+export default function DoctorSearch() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [specializations, setSpecializations] = useState([]);
+  const [selectedSpecialization, setSelectedSpecialization] = useState('');
+
+  useEffect(() => {
+    fetchSpecializations();
+    fetchDoctors();
+  }, []);
+
+  const fetchSpecializations = async () => {
+    try {
+      const response = await api.get('/specializations');
+      setSpecializations(response.data.data.specializations);
+    } catch (error) {
+      console.error('Failed to fetch specializations:', error);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (search) params.search = search;
+      if (selectedSpecialization) params.specializationId = selectedSpecialization;
+      
+      const response = await api.get('/doctors', { params });
+      setDoctors(response.data.data.doctors);
+    } catch (error) {
+      console.error('Failed to fetch doctors:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchDoctors();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <div className="container px-6 py-8 mx-auto">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8">Find Doctors</h1>
+
+        {/* Search and Filter */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            
+            <select
+              value={selectedSpecialization}
+              onChange={(e) => setSelectedSpecialization(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">All Specializations</option>
+              {specializations.map((spec) => (
+                <option key={spec.id} value={spec.id}>
+                  {spec.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2"
+            >
+              <FaSearch /> Search
+            </button>
+          </form>
+        </div>
+
+        {/* Doctors Grid */}
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : doctors.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <FaUserMd className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500">No doctors found</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {doctors.map((doctor) => (
+              <div key={doctor.id} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FaUserMd className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="font-semibold text-gray-800">
+                      Dr. {doctor.firstName} {doctor.lastName}
+                    </h3>
+                    <div className="flex items-center mt-1">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span className="ml-1 text-sm text-gray-600">
+                        {doctor.averageRating?.toFixed(1) || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  {doctor.specializations?.length > 0 && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Specialization:</span> {doctor.specializations[0].specialization.name}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Experience:</span> {doctor.yearsOfExperience} years
+                  </p>
+                  {doctor.clinics?.length > 0 && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Clinic:</span> {doctor.clinics[0].clinic.name}
+                    </p>
+                  )}
+                </div>
+
+                <Link
+                  to={`/patient/book/${doctor.id}`}
+                  className="block w-full py-2 text-center text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                >
+                  Book Appointment
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+# Continue with other files in next message due to length...

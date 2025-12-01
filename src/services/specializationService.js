@@ -1,4 +1,4 @@
-const { getPrisma } = require('../db/prisma');
+import { getPrisma } from '../db/prisma';
 
 async function createSpecialization({ name, nameEn, description, icon }) {
   const prisma = getPrisma();
@@ -44,10 +44,11 @@ async function getDoctorWithSpecializations(doctorId) {
   };
 }
 
-module.exports = {
+export default {
   createSpecialization,
   listSpecializations,
   linkDoctorSpecialization,
   unlinkDoctorSpecialization,
   getDoctorWithSpecializations
 };
+

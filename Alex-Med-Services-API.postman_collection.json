@@ -1,0 +1,2238 @@
+{
+	"info": {
+		"_postman_id": "alex-med-services-api",
+		"name": "Alex Med Services API",
+		"description": "Complete API collection for Alex Medical Services - 70 endpoints (includes Update Profile + Persistent Notifications)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"patient@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"01234567890\",\n  \"role\": \"PATIENT\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"address\": \"123 Main St, Alexandria\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					}
+				},
+				{
+					"name": "Signin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"accessToken\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"refreshToken\", jsonData.data.refreshToken);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"patient@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"dr_ahmed_cardio\",\n  \"phone\": \"01234567890\",\n  \"firstName\": \"أحمد\",\n  \"lastName\": \"محمد\",\n  \"bio\": \"استشاري قلب وأوعية دموية مع خبرة 10 سنوات\",\n  \"yearsOfExperience\": 10,\n  \"qualifications\": \"بكالوريوس الطب والجراحة - ماجستير أمراض القلب\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"change-password"
+							]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctors (Public)",
+			"item": [
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors?limit=10&page=1&specializationId=&city=&area=&minRating=&search=&sortBy=rating&sortOrder=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "specializationId",
+									"value": ""
+								},
+								{
+									"key": "city",
+									"value": ""
+								},
+								{
+									"key": "area",
+									"value": ""
+								},
+								{
+									"key": "minRating",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "sortBy",
+									"value": "rating"
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/search?query=ahmed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "ahmed"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Top-Rated Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/top-rated?limit=5&minReviews=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"top-rated"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								},
+								{
+									"key": "minReviews",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/:doctorId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								":doctorId"
+							],
+							"variable": [
+								{
+									"key": "doctorId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Specializations",
+			"item": [
+				{
+					"name": "Get All Specializations (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/specializations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"specializations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Specialization by ID (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/specializations/:specializationId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"specializations",
+								":specializationId"
+							],
+							"variable": [
+								{
+									"key": "specializationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Specialization (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nameAr\": \"جراحة\",\n  \"nameEn\": \"Surgery\",\n  \"descriptionAr\": \"تخصص الجراحة العامة\",\n  \"descriptionEn\": \"General Surgery specialty\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/specializations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"specializations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Specialization (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descriptionAr\": \"تخصص الجراحة العامة المحدث\",\n  \"descriptionEn\": \"Updated General Surgery specialty\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/specializations/:specializationId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"specializations",
+								":specializationId"
+							],
+							"variable": [
+								{
+									"key": "specializationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Specialization (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/specializations/:specializationId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"specializations",
+								":specializationId"
+							],
+							"variable": [
+								{
+									"key": "specializationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Clinics",
+			"item": [
+				{
+					"name": "Get All Clinics (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics?city=&area=&search=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": ""
+								},
+								{
+									"key": "area",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Clinic by ID (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clinics/:clinicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								":clinicId"
+							],
+							"variable": [
+								{
+									"key": "clinicId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Clinic (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Alexandria Medical Center\",\n  \"address\": \"123 Main Street\",\n  \"city\": \"الإسكندرية\",\n  \"area\": \"سموحة\",\n  \"phoneNumber\": \"0333333333\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clinics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Clinic (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"0344444444\",\n  \"address\": \"456 Updated Street\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clinics/:clinicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								":clinicId"
+							],
+							"variable": [
+								{
+									"key": "clinicId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Clinic (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clinics/:clinicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinics",
+								":clinicId"
+							],
+							"variable": [
+								{
+									"key": "clinicId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get Doctor Reviews (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/doctors/:doctorId/reviews?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								"doctors",
+								":doctorId",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							],
+							"variable": [
+								{
+									"key": "doctorId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Review (Patient)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctorId\": 1,\n  \"rating\": 5,\n  \"comment\": \"Excellent doctor! Very professional and caring.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get My Reviews (Patient)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/my-reviews?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								"my-reviews"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Review (Patient)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated: Very good doctor\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews/:reviewId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								":reviewId"
+							],
+							"variable": [
+								{
+									"key": "reviewId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Review (Patient)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/:reviewId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								":reviewId"
+							],
+							"variable": [
+								{
+									"key": "reviewId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notifications (All Roles)",
+			"item": [
+				{
+					"name": "Get My Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications?unreadOnly=false&category=&priority=&page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "unreadOnly",
+									"value": "false",
+									"description": "Set to true to get only unread notifications"
+								},
+								{
+									"key": "category",
+									"value": "",
+									"description": "Filter by category: APPOINTMENT, SYSTEM, ACCOUNT, REMINDER, REVIEW"
+								},
+								{
+									"key": "priority",
+									"value": "",
+									"description": "Filter by priority: low, medium, high"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"unread-count"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Notification by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/:id/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"read-all"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete All Read Notifications",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/read/all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"read",
+								"all"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Specializations",
+			"item": [
+				{
+					"name": "Get My Specializations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/specializations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"specializations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Specialization",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specializationId\": 1,\n  \"isPrimary\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/specializations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"specializations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Specialization (Set Primary)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isPrimary\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/specializations/:doctorSpecializationId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"specializations",
+								":doctorSpecializationId"
+							],
+							"variable": [
+								{
+									"key": "doctorSpecializationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Specialization",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/specializations/:doctorSpecializationId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"specializations",
+								":doctorSpecializationId"
+							],
+							"variable": [
+								{
+									"key": "doctorSpecializationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Clinics",
+			"item": [
+				{
+					"name": "Get My Clinics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/clinics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"clinics"
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Clinic",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clinicId\": 1,\n  \"consultationFee\": 200.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/clinics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"clinics"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Clinic Fee",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"consultationFee\": 250.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/clinics/:doctorClinicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"clinics",
+								":doctorClinicId"
+							],
+							"variable": [
+								{
+									"key": "doctorClinicId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Clinic",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/clinics/:doctorClinicId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"clinics",
+								":doctorClinicId"
+							],
+							"variable": [
+								{
+									"key": "doctorClinicId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Schedules",
+			"item": [
+				{
+					"name": "Check Schedule Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/schedules/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"schedules",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get My Schedules",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"schedules"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Week Schedule",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clinicId\": 1,\n  \"schedules\": [\n    {\n      \"dayOfWeek\": \"MONDAY\",\n      \"startTime\": \"09:00\",\n      \"endTime\": \"17:00\",\n      \"slotDuration\": 30\n    },\n    {\n      \"dayOfWeek\": \"WEDNESDAY\",\n      \"startTime\": \"10:00\",\n      \"endTime\": \"16:00\",\n      \"slotDuration\": 30\n    },\n    {\n      \"dayOfWeek\": \"FRIDAY\",\n      \"startTime\": \"09:00\",\n      \"endTime\": \"14:00\",\n      \"slotDuration\": 30\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/schedules/week",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"schedules",
+								"week"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Schedule",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startTime\": \"08:00\",\n  \"endTime\": \"16:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/schedules/:scheduleId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"schedules",
+								":scheduleId"
+							],
+							"variable": [
+								{
+									"key": "scheduleId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Schedule",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/schedules/:scheduleId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"schedules",
+								":scheduleId"
+							],
+							"variable": [
+								{
+									"key": "scheduleId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Appointments",
+			"item": [
+				{
+					"name": "Get Today's Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/appointments/today",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"appointments",
+								"today"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All My Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/appointments?status=&startDate=&endDate=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "startDate",
+									"value": ""
+								},
+								{
+									"key": "endDate",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Patient History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/appointments/patient/:patientId/history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"appointments",
+								"patient",
+								":patientId",
+								"history"
+							],
+							"variable": [
+								{
+									"key": "patientId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Appointment Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CONFIRMED\",\n  \"notes\": \"Patient confirmed for appointment\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/appointments/:appointmentId/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"appointments",
+								":appointmentId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "appointmentId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Reports",
+			"item": [
+				{
+					"name": "Get Daily Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/reports/daily?date=2025-11-23",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"reports",
+								"daily"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2025-11-23"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Weekly Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/reports/weekly?startDate=2025-11-17",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"reports",
+								"weekly"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-11-17"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Monthly Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/reports/monthly?year=2025&month=11",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"reports",
+								"monthly"
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "2025"
+								},
+								{
+									"key": "month",
+									"value": "11"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Patient Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/reports/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"reports",
+								"patients"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor - Notifications",
+			"item": [
+				{
+					"name": "Get Doctor Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"doctor",
+								"notifications"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Patient - Profile",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patient/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patient",
+								"profile"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"01234567899\",\n  \"address\": \"456 Updated Street, Alexandria\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patient",
+								"profile"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Medical History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patient/medical-history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patient",
+								"medical-history"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Upcoming Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patient/upcoming",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patient",
+								"upcoming"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Patient Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patient/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patient",
+								"notifications"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Patient - Appointments",
+			"item": [
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/available-slots/:doctorId?startDate=2025-11-25&endDate=2025-11-30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"available-slots",
+								":doctorId"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-11-25"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-11-30"
+								}
+							],
+							"variable": [
+								{
+									"key": "doctorId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Book Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctorId\": 1,\n  \"scheduleId\": 1,\n  \"appointmentDate\": \"2025-11-25\",\n  \"timeSlot\": \"09:00\",\n  \"reasonForVisit\": \"Regular checkup\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments/book",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"book"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get My Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/my-appointments?status=&page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"my-appointments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/:appointmentId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								":appointmentId"
+							],
+							"variable": [
+								{
+									"key": "appointmentId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cancellationReason\": \"Unable to attend due to emergency\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments/:appointmentId/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								":appointmentId",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "appointmentId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"dashboard"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users?page=1&limit=10&role=&isActive=&search=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": ""
+								},
+								{
+									"key": "isActive",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update User Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isActive\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/:userId/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								":userId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/appointments?page=1&limit=10&status=&startDate=&endDate=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "startDate",
+									"value": ""
+								},
+								{
+									"key": "endDate",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
